@@ -11,7 +11,7 @@
 	var types = {
 			Adjektiv: Adjektiv,
 			Substantiv: Substantiv
-	}
+	};
 
 	Dictionary.prototype.findWord = function(prefix, type, options) {
 		var url = 'http://api.creativecouple.de/language/'+encodeURIComponent(this.lang)+'/'+encodeURIComponent(type)+'.php/'+encodeURIComponent(prefix);
@@ -85,12 +85,13 @@
 		return this.flex({
 			article : false
 		});
-	}
+	};
+	
 	Word.prototype.withArticle = function() {
 		return this.flex({
 			article : true
 		});
-	}
+	};
 	
 	function Adjektiv(data) {
 		Word.call(this, data);
@@ -100,6 +101,10 @@
 		}
 	}
 	Adjektiv.prototype = new Word({});
+	
+	Adjektiv.prototype.hasNumerus = function(numerus) {
+		return numerus === 'singular' || numerus === 'plural';
+	};
 	
 	Adjektiv.prototype.toString = function(){
 		var gen = (this.numerus == 'plural') ? 'plural' : this.genus;
@@ -119,14 +124,22 @@
 		Word.call(this, data);
 		for (var genus in this.source) {
 			this.genus = genus;
+			for (var numerus in this.source[genus][this.beugung]) {
+				this.numerus = numerus;
+				break;
+			}
 			break;
 		}
 	}
 	Substantiv.prototype = new Word({});
-	
+
+	Substantiv.prototype.hasNumerus = function(numerus) {
+		return !!this.source[this.genus][this.beugung][numerus];
+	};
+
 	Substantiv.prototype.toString = function(){
 		var variant = this.source[this.genus][this.beugung][this.numerus][this.casus];
-		return String(this.article ? variant[1]+' '+variant[0] : variant[0]);
+		return String((this.article && variant[1]) ? variant[1]+' '+variant[0] : variant[0]);
 	};
 
 })(jQuery);
