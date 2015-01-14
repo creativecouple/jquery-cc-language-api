@@ -20,7 +20,6 @@
 			data : $.extend(options, {typ:options.comparatio}),
 			dataType: "jsonp"
 		}).then(function(data) {		
-			console.log(url, data);
 			if (!data.flex) {
 				return null;
 			}
@@ -134,7 +133,11 @@
 	Substantiv.prototype = new Word({});
 
 	Substantiv.prototype.hasNumerus = function(numerus) {
-		return !!this.source[this.genus][this.beugung][numerus];
+		try {
+			return !!this.source[this.genus][this.beugung][numerus];
+		} catch (error) {
+			return false;
+		}
 	};
 
 	Substantiv.prototype.toString = function(){
